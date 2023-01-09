@@ -206,30 +206,44 @@ class Tema2:
 
         return image
 
+    def inverse_image(self, image):
+        im = np.array(image)
+
+        mask = np.full(im.shape,255)
+
+        mod_img = mask - im
+        mod_img = mod_img.astype(np.uint8)
+
+        return mod_img
+
     def combine_images(self, image1, image2):
         # Create an empty image for the blend
         blend = np.zeros([image1.shape[0], image1.shape[1], 3], dtype=np.uint8)
 
-        alpha = 0.8
-        beta = 0.5
-        gamma = 0
-        # Loop through the pixels of the images and add them to the blend
+        # Iteram prin toti pixelii
+        # Si daca avem in imaginea canny pixel negru
+        # Il scriem
+        # Daca nu, scriem pixelul din imaginea principala
         for y in range(image1.shape[0]):
             for x in range(image1.shape[1]):
-                # blend[y, x] = (image1[y, x] + image2[y, x]) // 2
-                blend[y,x] = image2[y,x] * alpha + image1[y,x] * beta + gamma
-
-
-        # Save the blended image
-        # cv2.imwrite("blend.jpg", blend)
-
+                if(image1[y,x] == 0):
+                    blend[y,x] = 0
+                else:
+                    blend[y,x] = image2[y,x]
         return blend
 
+
+    def median_filter(self, image):
+
+        return image
 
     def solve_homework(self, image, show=True):
 
         # Generam imaginea folosind canny
         canny_image = self.canny(image, 0, 50)
+
+        # Inversam culorile
+        canny_image = self.inverse_image(canny_image)
 
         # Setam sa fie pe 8 canale
         # Ca sa arate bine pe imshow
@@ -239,9 +253,10 @@ class Tema2:
         reduced_image = self.reduce_colors(image, 6)
 
         # TODO: Filtru Median
+        median_filter = self.median_filter(reduced_image)
 
         # TODO: Combinare poze
-        combined_images = self.combine_images(canny_image, reduced_image)
+        combined_images = self.combine_images(canny_image, median_filter)
 
         if show:
             cv2.imshow("Image", image)
