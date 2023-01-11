@@ -202,9 +202,36 @@ class Tema2:
         return image
 
 
+    # Paper: https://hackernoon.com/learn-k-means-clustering-by-quantizing-color-images-in-python
+    # Reducerea culorilor folosind K-MEANS (BONUS)
     def reduce_colors(self,image, num_colors):
 
-        return image
+        # Convertim imaginea pentru cele 3 canale
+        pixels = image.reshape(-1, 3).astype(np.float32)
+        
+        # Initializam clustere cu centre random
+        indices = np.random.randint(0, pixels.shape[0], size=num_colors)
+        centroids = pixels[indices]
+
+        # Repeteam algoritmul pana converge conform teoriei
+        for _ in range(10):
+            # Calculam pentru fiecare pixel distanta folosind formula din paper
+            # Pentru fiecare pixel ii asignam cel mai apropait centru
+            distances = np.sqrt(((pixels - centroids[:, np.newaxis])**2).sum(axis=2))
+            closest_centroids = np.argmin(distances, axis=0)
+            
+            # Actualizam centrele
+            for i in range(num_colors):
+                points = pixels[closest_centroids == i]
+                if len(points) != 0:
+                    centroids[i] = points.mean(axis=0)
+
+        # Inlocuim fiecare pixel cu centrul respectiv
+        # Apoi convertim la 8canale
+        new_pixels = centroids[closest_centroids]
+        new_pixels = new_pixels.reshape(image.shape).astype(np.uint8)
+
+        return new_pixels
 
     def inverse_image(self, image):
         im = np.array(image)
@@ -233,9 +260,9 @@ class Tema2:
         return blend
 
 
-    def median_filter(self, image):
+    def median_filter(self, data, filter_size):
 
-        return image
+        return data
 
     def solve_homework(self, image, show=True):
 
@@ -249,13 +276,11 @@ class Tema2:
         # Ca sa arate bine pe imshow
         canny_image = canny_image.astype(np.uint8)
 
-        # TODO: Reducere numar de culori
-        reduced_image = self.reduce_colors(image, 6)
+        reduced_image = self.reduce_colors(image, 16)
 
         # TODO: Filtru Median
-        median_filter = self.median_filter(reduced_image)
+        median_filter = self.median_filter(reduced_image, 3)
 
-        # TODO: Combinare poze
         combined_images = self.combine_images(canny_image, median_filter)
 
         if show:
