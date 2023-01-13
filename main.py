@@ -10,6 +10,7 @@ if __name__ == "__main__":
     args = vars(ap.parse_args())
 
     # Citim path-ul imaginii de la tastatura
+    # python3 main.py - images/lena.png
     image = cv2.imread(args["image"])
 
     # Dam start la timer
@@ -19,7 +20,7 @@ if __name__ == "__main__":
     # Aplicam algoritmul pe poza
     canny = Tema2()
 
-    imagine_finala = canny.solve_homework(image, True)
+    combined_images = canny.solve_homework(image, True)
 
     # Verificam cat timp a durat algoritmul
     end = time.time()

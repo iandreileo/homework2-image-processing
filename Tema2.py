@@ -8,7 +8,6 @@ from itertools import product
 class Tema2:
 
     def grayscale(self,image):
-
         # Transformam toti pixelii in pixeli gray
         r, g, b = image[:,:,0], image[:,:,1], image[:,:,2]
         gray = 0.2989 * r + 0.5870 * g + 0.1140 * b
@@ -26,7 +25,6 @@ class Tema2:
 
 
     def gaussian_filter(self, image, k_size, sigma):
-
         # Extragem inaltime si latimea imaginii
         height, width = image.shape[0], image.shape[1]
         
@@ -140,7 +138,6 @@ class Tema2:
         return suppressed
 
     def double_threshold_hysteresis(self, image, low, high):
-
         # Definim tresholdul minim si maxim
         weak = 50
         strong = 255
@@ -164,14 +161,11 @@ class Tema2:
         # Definim directiile orizontale si verticale
         dx = np.array((-1, -1, 0, 1, 1, 1, 0, -1))
         dy = np.array((0, 1, 1, 1, 0, -1, -1, -1))
-        size = image.shape
         
         # Calculam edge-urile care raman in imagine
         while len(strong_x):
-            x = strong_x[0]
-            y = strong_y[0]
-            strong_x = np.delete(strong_x, 0)
-            strong_y = np.delete(strong_y, 0)
+            x, y = strong_x[0], strong_y[0]
+            strong_x, strong_y = np.delete(strong_x, 0), np.delete(strong_y, 0)
             for direction in range(len(dx)):
                 new_x = x + dx[direction]
                 new_y = y + dy[direction]
@@ -184,7 +178,6 @@ class Tema2:
         return result
 
     def canny(self, image, low, high):
-
         # Pentru a aplica filtrul CANNY
         # Trebuie sa urmam pasii de mai jos:
 
@@ -210,7 +203,7 @@ class Tema2:
         pixels = image.reshape(-1, 3).astype(np.float32)
         
         # Initializam clustere cu centre random
-        indices = np.random.randint(0, pixels.shape[0], size=num_colors)
+        indices = np.random.randint(0, pixels.shape[0], num_colors)
         centroids = pixels[indices]
 
         # Repeteam algoritmul pana converge conform teoriei
@@ -229,23 +222,22 @@ class Tema2:
         # Inlocuim fiecare pixel cu centrul respectiv
         # Apoi convertim la 8canale
         new_pixels = centroids[closest_centroids]
-        new_pixels = new_pixels.reshape(image.shape).astype(np.uint8)
+        new_pixels = new_pixels.reshape(image.shape)
 
-        return new_pixels
+        return new_pixels.astype(np.uint8)
 
     def inverse_image(self, image):
-        im = np.array(image)
+        # Cream masca
+        mask = np.full(image.shape, 255)
 
-        mask = np.full(im.shape,255)
+        # Aplicam masca pe imagine
+        mod_img = mask - image
 
-        mod_img = mask - im
-        mod_img = mod_img.astype(np.uint8)
-
-        return mod_img
+        return mod_img.astype(np.uint8)
 
     def combine_images(self, image1, image2):
-        # Create an empty image for the blend
-        blend = np.zeros([image1.shape[0], image1.shape[1], 3], dtype=np.uint8)
+        # Combinarea imaginilor se face prin metoda de blending
+        new_image = np.zeros([image1.shape[0], image1.shape[1], 3], dtype=np.uint8)
 
         # Iteram prin toti pixelii
         # Si daca avem in imaginea canny pixel negru
@@ -254,18 +246,16 @@ class Tema2:
         for y in range(image1.shape[0]):
             for x in range(image1.shape[1]):
                 if(image1[y,x] == 0):
-                    blend[y,x] = 0
+                    new_image[y,x] = 0
                 else:
-                    blend[y,x] = image2[y,x]
-        return blend
+                    new_image[y,x] = image2[y,x]
+        return new_image
 
 
     def median_filter(self, data, filter_size):
-
         return data
 
     def solve_homework(self, image, show=True):
-
         # Generam imaginea folosind canny
         canny_image = self.canny(image, 0, 50)
 
@@ -281,6 +271,7 @@ class Tema2:
         # TODO: Filtru Median
         median_filter = self.median_filter(reduced_image, 3)
 
+        # Combinam cele 2 imagini construite
         combined_images = self.combine_images(canny_image, median_filter)
 
         if show:
@@ -296,5 +287,4 @@ class Tema2:
             cv2.imshow("Reduced Image", reduced_image)
             cv2.waitKey(0)
 
-        # Returnam si afisam numarul de inamtriculare
-        return canny_image, reduced_image
+        return combined_images
